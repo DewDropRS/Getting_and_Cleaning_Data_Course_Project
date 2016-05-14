@@ -27,17 +27,15 @@ From the data set in step 4, creates a second, independent tidy data set with th
 1. load libraries
 2. set working directory
 3. read in all relevant data files
-  + X_train.txt
-  + X_test.txt
-  + features.txt
-4. examine the data: run function dim() to view the table dimensions, use head() to view some of the data
+4. examine the data: run function str() to view table information
 5. generate valid column names from the features table
   + human readable, remove dashes and parenthesis
   + ensure all variable names are unique
   + apply new names to data frames, x_train and x_test
-6. add a new factor column to each data frame called source with labels "train" and "test"
+6. add new columns, source, subjectid, and activity
 7. merge x_train.txt and x_test.txt using rbind()
-8. use select to find all columns that contain "mean", "std" or "source" in the variable name and save to new data frame
+8. use select to find all columns that contain "mean", "std" in the variable name and save to new data frame
+9. summarize-get the mean of all measures group by subjectid and activity
 
 
 
