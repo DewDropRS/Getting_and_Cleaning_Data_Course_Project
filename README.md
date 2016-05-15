@@ -39,6 +39,7 @@ I decided to use the variable names in the features file and just cleaned them u
 7. merge x_train.txt and x_test.txt using rbind()
 8. use select to find all columns that contain "mean", "std" in the variable name and save to new data frame
 9. summarize-get the mean of all measures group by subjectid and activity
+10. output summary dataset to txt file
 
 ## Please see CodeBook.Rmd for code, results, and notes. Code was embedded using code chunks.
 
