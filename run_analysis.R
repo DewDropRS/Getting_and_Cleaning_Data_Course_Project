@@ -69,6 +69,7 @@
 ## 7. merge x_train.txt and x_test.txt using rbind()
 ## 8. use select to find all columns that contain "mean", "std" in the variable name and save to new data frame
 ## 9. summarize-get the mean of all measures group by subjectid and activity
+## 10. output summary dataset to txt file
 ##******************************************************************************
 
 
@@ -166,3 +167,8 @@ str(acc_mean_std_analset)
 acc_mean_std_avg <- acc_mean_std_analset %>% group_by(subjectid, source, activity) %>% summarise_each(funs(mean))
 str(acc_mean_std_avg)
 head(acc_mean_std_avg, 5)
+
+## 10. output summary dataset to txt file
+## use write.table() using row.name=FALSE
+
+write.table(acc_mean_std_avg, file = 'acc_mean_std_avg.txt', row.names = FALSE, sep = "\t")

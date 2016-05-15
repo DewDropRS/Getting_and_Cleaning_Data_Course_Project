@@ -151,6 +151,13 @@ str(acc_mean_std_avg)
 head(acc_mean_std_avg, 5)
 ```
 
+### 10. Output summary dataset to txt file
+use write.table() using row.name=FALSE
+```{r}
+write.table(acc_mean_std_avg, file = 'acc_mean_std_avg.txt', row.names = FALSE, sep = "\t")
+```
+
+
 
 
 
