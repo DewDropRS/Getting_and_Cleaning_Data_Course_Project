@@ -20,7 +20,10 @@ Uses descriptive activity names to name the activities in the data set
 Appropriately labels the data set with descriptive variable names.
 From the data set in step 4, creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 
-## Project Scripts
+## Note about some decisons I made...
+I decided to use the variable names in the features file and just cleaned them up to make more human readable and created unique names for those that were duplicated. I also decided to row bind my data instead of column bind. I did not want to have a very wide data frame. I added a column called source so that I know which dataset the subject originated from.
+
+## Project Script
 ### run_analysis.R
 > Steps
 
@@ -36,6 +39,9 @@ From the data set in step 4, creates a second, independent tidy data set with th
 7. merge x_train.txt and x_test.txt using rbind()
 8. use select to find all columns that contain "mean", "std" in the variable name and save to new data frame
 9. summarize-get the mean of all measures group by subjectid and activity
+
+## Please see CodeBook.Rmd for code, results, and notes. Code was embedded using code chunks.
+
 
 
 
