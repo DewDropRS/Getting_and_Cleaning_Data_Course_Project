@@ -1,0 +1,156 @@
+---
+title: "Getting and Cleaning Data- Course Project Code Book"
+author: "Rocio Ana-Sofia Segura"
+date: "May 14, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Code Book
+
+##The steps to obtain the analysis and final summary data frames are described below with embedded r code chunks and results to facilitate peer reviews. For a description of the assignment, please see the README.md file. 
+
+### 1. Load libraries
+```{r}
+library(data.table)
+library(dplyr)
+```
+
+### 2. Set the working directory
+```{r}
+setwd("~/coursera/GettingAndCleaningData/data")
+getwd()
+```
+
+### 3. Import relevant raw data.
+(Not in its most raw form but calling it raw data here since this is the most raw form available to me.)
+```{r}
+xtrain		      <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/train/X_train.txt", header = FALSE)
+xtest			      <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/test/X_test.txt", header = FALSE)
+features 	      <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/features.txt", header = FALSE)
+subject_test 	  <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/test/subject_test.txt", header = FALSE)
+subject_train 	<- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/train/subject_train.txt", header = FALSE)
+ytrain 	        <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/train/y_train.txt", header = FALSE)
+ytest 	        <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/test/y_test.txt", header = FALSE)
+actlabels       <- read.table("/Users/rociosegura/coursera/GettingAndCleaningData/data/UCI HAR Dataset/activity_labels.txt", header = FALSE)
+```
+
+Join activity labels to ytrain and ytest data frames
+```{r}
+ytrain <- merge(ytrain, actlabels, by = "V1")
+ytrain <- setnames(ytrain, old='V2', new = 'activity')
+
+ytest <- merge(ytest, actlabels, by = "V1")
+ytest <- setnames(ytest, old='V2', new = 'activity')
+```
+
+### 4. Examine the data
+Here I created a function to run str on all the data I imported in a for loop.
+```{r}
+dflist <- list(xtrain, xtest, features, subject_test, subject_train, ytrain,ytest, actlabels)
+dfnames <- list("xtrain","xtest","features","subject_test", "subject_train","ytrain","ytest","actlabels")
+
+mystrfxn <- function(x,y) {
+  
+  for(i in 1:length(x)) {
+    print(paste('Data Frame Name: ' , y[i]))
+    str(x[i])
+  }
+  return
+}
+
+mystrfxn(x = dflist, y = dfnames)
+```
+
+### 5. Generate valid column names 
+Here I chose to use the variable names already provided with the UCI HAR Datasets. 
+* Get column names from features data frame and save to new vector named features2
+* Process names so that variables are human readable
+```{r}
+features2 <- mutate(features, tmpvarname = gsub("\\(\\)","", V2), newvarnames = gsub("-","_", tmpvarname))
+```
+### Select the variable (newvarnames) that corresponds to the processed variable names
+```{r}
+varnames <- as.vector(t(select(features2, newvarnames)))
+```
+
+* There are values (vector of column names) in varnames that are duplicated
+* Use make.names with unique equal to TRUE so that all column names get a unique value.
+* Save to a new vector named validvarnames
+```{r}
+validvarnames <-  make.names(varnames, unique = TRUE)
+```
+
+* Use validvarnames vector as the source for the new names
+```{r}
+oldtrainnames <- names(xtrain)
+xtrain <- setnames(xtrain, old = oldtrainnames, new = validvarnames)
+
+oldtestnames <- names(xtest)
+xtest <- setnames(xtest, old = oldtestnames, new = validvarnames)
+```
+
+
+### 6. Add new columns, source, subjectid, and activity
+
+* Add a new column to identify whether test or train data
+```{r}
+xtrain  <- mutate(xtrain, source="train")
+xtest   <- mutate(xtest, source="test")
+```
+
+* Add a subject id and activity column from subject_test/train and ytest/xtest respectively
+```{r}
+xtrain <- cbind(subjectid=subject_train$V1, activity = ytrain$activity, xtrain)
+xtest <- cbind(subjectid=subject_test$V1, activity = ytest$activity, xtest)
+```
+
+
+
+### 7. Merge x_train.txt and x_test.txt using rbind()
+```{r}
+train_test_appended <- rbind(xtrain, xtest) 
+```
+
+
+
+* Arrange subjectid and source so they appear as the first columns
+```{r}
+train_test_appended <- train_test_appended %>%
+  select(source, everything())
+train_test_appended <- train_test_appended %>%
+  select(subjectid, everything())
+```
+
+
+
+### 8. Use select to find all column names that contain "mean_", "std_", "source", "subjectid", or "activity"
+```{r}
+acc_mean_std_analset <- train_test_appended %>%
+  select(matches('mean_|std_|source|subjectid|activity')) 
+```
+
+### Analysis data frame - (acc_mean_std_analset)
+The measurements included in this data frame are limited to the mean and standard deviation variables plus 3 extra columns that are helpful in summarizing the data. 
+
+* subjectid (subject id number from the subject_test/train txt input files)
+* source (new column I created to denote whether subject was either in the train or test group)
+* activity (column added from the ytest/ytrain txt input files and activity labels joined from the activity_labels.txt file)
+```{r}
+str(acc_mean_std_analset)
+head(acc_mean_std_analset, 5)
+```
+
+### 9. Summarize
+The final data frame, acc_mean_std_avg, contains the averages for the means and standard deviation measures grouped by subjectid, source and activity.
+```{r}
+acc_mean_std_avg <- acc_mean_std_analset %>% group_by(subjectid, source, activity) %>% summarise_each(funs(mean))
+str(acc_mean_std_avg)
+head(acc_mean_std_avg, 5)
+```
+
+
+
+

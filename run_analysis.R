@@ -148,21 +148,21 @@ xtrain <- cbind(subjectid=subject_train$V1, activity = ytrain$activity, xtrain)
 xtest <- cbind(subjectid=subject_test$V1, activity = ytest$activity, xtest)
 
 ## 7. merge x_train.txt and x_test.txt using rbind()
-traintestcomb <- rbind(xtrain, xtest) 
+train_test_appended <- rbind(xtrain, xtest) 
 
 ## Arrange subjectid and source so they appear as the first columns
-traintestcomb <- traintestcomb %>%
+train_test_appended <- train_test_appended %>%
   select(source, everything())
-traintestcomb <- traintestcomb %>%
+train_test_appended <- train_test_appended %>%
   select(subjectid, everything())
 
 ## 8. use select to find all column names that contain "mean", "std" or "source"
-acc_measures_analset <- traintestcomb %>%
-  select(matches('mean|std|source|subject|activity')) 
-str(acc_measures_analset)
+acc_mean_std_analset <- train_test_appended %>%
+  select(matches('mean_|std_|source|subjectid|activity')) 
+str(acc_mean_std_analset)
 
 ## 9. summarize-get the mean of all measures group by subjectid, source and  activity
 
-acc_measures_sum <- acc_measures_analset %>% group_by(subjectid, source, activity) %>% summarise_each(funs(mean))
-str(acc_measures_sum)
-head(acc_measures_sum, 5)
+acc_mean_std_avg <- acc_mean_std_analset %>% group_by(subjectid, source, activity) %>% summarise_each(funs(mean))
+str(acc_mean_std_avg)
+head(acc_mean_std_avg, 5)
